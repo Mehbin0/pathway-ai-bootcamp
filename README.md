@@ -21,17 +21,17 @@ Before running this project, ensure you have the following installed:
 ## Installation
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/youtube-chatbot.git
+git clone https://github.com/Mehbin0/pathway-ai-bootcamp.git
 ```
 2. Navigate to the project directory:
 ```bash
-cd youtube-chatbot
+cd pathway-ai-bootcamp
 ```
 3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
-4. Set up environment variables by creating a `.env` file in the root directory and filling it with your API keys and other configurations. Use the provided `.env.example` as a template.
+4. Set up environment variables by creating a `.env` file in the root directory and filling it with your API keys and other configurations. 
 
 ## Usage
 1. Start the Flask API:
@@ -50,5 +50,3 @@ You can customize the behavior of the chatbot by modifying the environment varia
 ## Contributing
 Contributions are welcome! Feel free to submit pull requests or open issues for any improvements or bug fixes.
 
-## License
-[Include license information]
