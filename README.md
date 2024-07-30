@@ -8,9 +8,6 @@ This project implements a chatbot that can answer queries based on the content o
 - Integrates with the YouTube API to fetch video data.
 - Provides real-time responses to user queries.
 
-## Demo
-[Add a GIF or video demonstrating the chatbot in action]
-
 ## Prerequisites
 Before running this project, ensure you have the following installed:
 - Python 3.x
