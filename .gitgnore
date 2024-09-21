@@ -1,5 +1,6 @@
-pw-env/
+.env
 __pycache__/
-**/.env
+*.pyc
 .vscode/
-.DS_Store
+.idea/
+venv/
