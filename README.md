@@ -1,4 +1,4 @@
-#YouTube Video Chatbot
+# YouTube Video Chatbot
 
 This project implements an interactive chatbot that can answer queries based on the content of a YouTube video. It uses Pathway for data processing, OpenAI for natural language processing, and the YouTube Data API for fetching video information.
 
