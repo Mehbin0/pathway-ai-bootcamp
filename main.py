@@ -4,24 +4,11 @@ import openai
 from googleapiclient.discovery import build
 from urllib.parse import urlparse, parse_qs
 from common.embedder import create_embeddings
-from common.openaiapi_helper import get_openai_api_key, get_youtube_api_key
 from common.prompt import SYSTEM_PROMPT, generate_user_prompt
 
-def get_user_input():
-    video_url = input("Please enter the YouTube video URL: ")
-    
-    # Extract video ID from URL
-    parsed_url = urlparse(video_url)
-    video_id = parse_qs(parsed_url.query).get('v', [None])[0]
-    if not video_id:
-        print("Invalid YouTube URL. Please provide a valid URL.")
-        exit(1)
-    
-    return video_id
-
-def setup_apis():
-    openai.api_key = get_openai_api_key()
-    youtube = build("youtube", "v3", developerKey=get_youtube_api_key())
+def setup_apis(openai_api_key, youtube_api_key):
+    openai.api_key = openai_api_key
+    youtube = build("youtube", "v3", developerKey=youtube_api_key)
     return youtube
 
 def get_video_transcript(youtube, video_id):
@@ -61,21 +48,7 @@ def answer_query(query, index):
     response = generate_response(query, context)
     return response
 
-def chatbot(youtube, video_id):
-    table, index = process_video(youtube, video_id)
-
-    while True:
-        user_query = input("Enter your question (or 'quit' to exit): ")
-        if user_query.lower() == 'quit':
-            break
-
-        response = answer_query(user_query, index)
-        print(f"Response: {response}\n")
-
-def main():
-    video_id = get_user_input()
-    youtube = setup_apis()
-    chatbot(youtube, video_id)
-
 if __name__ == "__main__":
-    main()
+    root = tk.Tk()
+    chatbot_ui = ChatbotUI(root)
+    root.mainloop()
