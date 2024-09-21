@@ -1,31 +1,49 @@
-import os
-import importlib
-from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+import pathway as pw
+from pathway.stdlib.ml.index import KNNIndex
+import openai
+from googleapiclient.discovery import build
+from common.config import OPENAI_API_KEY, YOUTUBE_API_KEY
 
-# Load environment variables
-load_dotenv()
+openai.api_key = OPENAI_API_KEY
 
-app = Flask(__name__)
-
-@app.route('/', methods=['POST'])
-def chatbot():
-    query = request.json.get('query', '')
-
-    if not query:
-        return jsonify({'error': 'Query parameter is missing'}), 400
-
+def get_video_transcript(video_id):
+    youtube = build("youtube", "v3", developerKey=YOUTUBE_API_KEY)
     try:
-        module = importlib.import_module("common")
-        app_module = importlib.import_module("common.api")
-        response = app_module.process_query(query)
+        request = youtube.videos().list(part="snippet", id=video_id)
+        response = request.execute()
+        return response['items'][0]['snippet']['description']
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"An error occurred: {e}")
+        return None
 
-    return jsonify({'response': response})
+def create_embeddings(text):
+    response = openai.Embedding.create(input=text, model="text-embedding-ada-002")
+    return response['data'][0]['embedding']
 
-def run(host=None, port=None):
-    app.run(host=host, port=port)
+def generate_response(query, context):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant that answers questions based on the given context."},
+            {"role": "user", "content": f"Context: {context}\n\nQuestion: {query}"}
+        ]
+    )
+    return response.choices[0].message['content']
 
-if __name__ == "__main__":
-    run()
+def process_video(video_id):
+    transcript = get_video_transcript(video_id)
+    if not transcript:
+        return pw.Table.empty()
+
+    chunks = [transcript[i:i+100] for i in range(0, len(transcript), 100)]
+    table = pw.Table.from_pylist([{"chunk": chunk} for chunk in chunks])
+    table += table.select(embedding=pw.apply(create_embeddings, pw.this.chunk))
+    index = KNNIndex(table.embedding)
+    return table, index
+
+def answer_query(query, index):
+    query_embedding = create_embeddings(query)
+    similar_chunks = index.query(query_embedding, k=3)
+    context = " ".join([chunk.chunk for chunk in similar_chunks])
+    response = generate_response(query, context)
+    return response
